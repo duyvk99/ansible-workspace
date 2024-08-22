@@ -4,7 +4,6 @@
   hosts: 
     - master
     - nodes
-  become: yes
   roles:
     - k8s-common
 
@@ -12,7 +11,6 @@
 - name: K8S Master
   hosts: 
     - master
-  become: yes
   roles:
     - k8s-master
 
@@ -20,6 +18,5 @@
 - name: K8S Nodes
   hosts: 
     - nodes
-  become: yes
   roles:
     - k8s-nodes
