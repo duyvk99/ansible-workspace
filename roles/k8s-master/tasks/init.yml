@@ -2,8 +2,10 @@
 - name: Init Kube-master
   shell: |
     kubeadm init --token {{ token }} --token-ttl {{ token_ttl }} \
-    --apiserver-advertise-address 10.0.10.100 \
-    --pod-network-cidr 10.23.0.0/16 
+    --apiserver-advertise-address {{ master_ip }} \
+    --apiserver-cert-extra-sans {{ additional_sans }} \
+    --control-plane-endpoint {{ control_plane_endpoint }} \
+    --pod-network-cidr {{ pod_network_cidr }} 
 
 - name: Creates Kubernetes config directory
   file:

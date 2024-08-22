@@ -1,4 +1,4 @@
 ---
 - name: Join Nodes to Kubernetes cluster
   shell: |
-    kubeadm join --token {{ token }} 10.0.10.100:6443 --discovery-token-unsafe-skip-ca-verification
+    kubeadm join --token {{ token }} {{ master_ip }}:6443 --discovery-token-unsafe-skip-ca-verification
