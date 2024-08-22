@@ -1,0 +1,22 @@
+---
+- name: Init Kube-master
+  shell: |
+    kubeadm init --token {{ token }} --token-ttl {{ token_ttl }} \
+    --apiserver-advertise-address 10.0.10.100 \
+    --pod-network-cidr 10.23.0.0/16 
+
+- name: Creates Kubernetes config directory
+  file:
+    path: ".kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Copy admin.conf to Home directory
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: ".kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: true

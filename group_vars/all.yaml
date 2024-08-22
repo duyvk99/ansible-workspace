@@ -1,0 +1,7 @@
+---
+ansible_become: yes 
+ansible_become_method: sudo
+ansible_become_pass: "123123"
+
+token: abcdef.0123456789abcdef
+token_ttl: 24h0m0s

@@ -1,0 +1,25 @@
+---
+##### Common #####
+- name: K8S Common
+  hosts: 
+    - master
+    - nodes
+  become: yes
+  roles:
+    - k8s-common
+
+##### K8s Master #####
+- name: K8S Master
+  hosts: 
+    - master
+  become: yes
+  roles:
+    - k8s-master
+
+##### K8s Nodes #####
+- name: K8S Nodes
+  hosts: 
+    - nodes
+  become: yes
+  roles:
+    - k8s-nodes

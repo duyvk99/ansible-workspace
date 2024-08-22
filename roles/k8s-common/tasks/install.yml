@@ -1,0 +1,145 @@
+---
+# Disable Swap 
+- name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
+  shell: |
+    swapoff -a
+
+- name: Disable SWAP in fstab since kubernetes can't work with swap enabled (2/2)
+  replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+# Modprobe
+- name: add module configuration persistent during reboots
+  copy:
+    src: "{{ role_path }}/files/modprobe-k8s.conf"
+    dest: /etc/modules-load.d/k8s.conf
+
+- name: Modprobe - Add overlay module
+  community.general.modprobe:
+    name: overlay
+    state: present
+
+- name: Modprobe - Add br_netfilter module
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+# Enable IPv4 packet forwarding 
+- name: Forwarding bridged traffic
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/k8s.conf
+    reload: true
+  with_items:
+    - { name: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+    - { name: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+    - { name: 'net.ipv4.ip_forward', value: '1' }
+
+# Check Systemd
+- name: Get the name of the process with PID 1
+  shell: "ps -p 1 -o comm="
+  register: pid1_process_name
+
+- name: Check if the process is systemd
+  set_fact:
+    is_systemd: "{{ 'true' if pid1_process_name.stdout == 'systemd' else 'false' }}"
+
+- name: Print result
+  debug:
+    msg: "Is the process with PID 1 systemd: {{ is_systemd }}"
+
+# Update Package
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+# Install & Update Package
+- name: Install dependencies for containerd & kubernetes
+  apt:
+    pkg:
+    - ca-certificates
+    - curl
+    - apt-transport-https
+    - gpg
+    state: latest
+
+- name: Create directory for Docker's GPG key
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add Docker's official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    keyring: /etc/apt/keyrings/docker.gpg
+    state: present
+
+- name: Get DEB architecture
+  shell: dpkg --print-architecture
+  register: deb_architecture
+
+- name: Add Docker repository
+  apt_repository:
+    repo: >-
+      deb [arch={{ deb_architecture.stdout }}
+      signed-by=/etc/apt/keyrings/docker.gpg]
+      https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+    filename: docker
+    state: present
+
+- name: Install containerd
+  apt:
+    name: containerd.io
+    state: latest
+
+- name: Systemd template containerd config
+  copy:
+    src: "{{ role_path }}/files/config.toml"
+    dest: /etc/containerd/config.toml
+  when: is_systemd == True
+
+- name: Update Config Restart containerd
+  systemd:
+    name: containerd.service
+    enabled: true
+    state: restarted
+  when: is_systemd == True
+
+# Install & Update Package
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Add Kubernetes's official GPG key
+  apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: present
+
+- name: Add Kubernetes repository
+  apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg]
+      https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /
+    filename: kubernetes
+    state: present
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Install kube
+  apt:
+    pkg:
+    - kubelet
+    - kubeadm
+    - kubectl
+    state: latest
+
+- name: Start kubelet service
+  systemd:
+    name: kubelet
+    enabled: true
+    state: started
