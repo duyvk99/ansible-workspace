@@ -1,0 +1,8 @@
+---
+- name: Install Calico Addons
+  include_tasks: calico.yml
+  when: network == "calico"
+
+- name: Install Calico Addons
+  include_tasks: cilium.yml
+  when: network == "cilium"

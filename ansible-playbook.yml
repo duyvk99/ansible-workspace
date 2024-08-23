@@ -13,6 +13,7 @@
     - master
   roles:
     - k8s-master
+    - cni
 
 ##### K8s Nodes #####
 - name: K8S Nodes

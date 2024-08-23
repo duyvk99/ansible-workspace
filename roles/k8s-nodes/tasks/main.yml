@@ -12,5 +12,5 @@
   systemd:
     name: kubelet
     daemon_reload: yes
-    state: started
+    state: restarted
     enabled: yes
