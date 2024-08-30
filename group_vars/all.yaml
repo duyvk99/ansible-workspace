@@ -7,15 +7,3 @@ ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 instance_ip: "{{ ansible_all_ipv4_addresses | sort | first }}"
 master_ip: "{{ hostvars[groups['master'][0]]['ansible_all_ipv4_addresses'] | sort | first }}"
-
-# Init Kubeadm
-token: abcdef.0123456789abcdef
-token_ttl: 24h0m0s
-
-pod_network_cidr: 10.23.0.0/16
-control_plane_endpoint: master-k8s.dannytest.com
-additional_sans: "10.40.1.90,{{ control_plane_endpoint }}"
-
-# Network Addons
-network: calico # Choosing in ["calico","cilium"]
-network_dir: /etc/kubernetes/network

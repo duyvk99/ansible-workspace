@@ -2,8 +2,7 @@
 ##### Common #####
 - name: K8S Common
   hosts: 
-    - master
-    - nodes
+    - cluster
   roles:
     - role: k8s-common
       tags: common
@@ -15,8 +14,8 @@
   roles:
     - role: k8s-master
       tags: master
-    # - role: cni
-    #   tags: cni
+    - role: cni
+      tags: cni
 
 ##### K8s Nodes #####
 - name: K8S Nodes
