@@ -43,14 +43,30 @@
 - name: Get the name of the process with PID 1
   shell: "ps -p 1 -o comm="
   register: pid1_process_name
+  changed_when: False
 
 - name: Check if the process is systemd
   set_fact:
     is_systemd: "{{ 'true' if pid1_process_name.stdout == 'systemd' else 'false' }}"
 
-- name: Print result
+- name: Check Systemd
   debug:
     msg: "Is the process with PID 1 systemd: {{ is_systemd }}"
+
+# Update /etc/hosts
+- name: Check if "{{ control_plane_endpoint }}" is already present
+  shell: grep -q '{{ control_plane_endpoint }}' /etc/hosts
+  register: domain_check
+  ignore_errors: true
+
+- name: Check /etc/hosts
+  debug:
+    msg: "{{ domain_check }}"
+
+- name: Update /etc/hosts
+  shell: |
+    echo "{{ master_ip }} {{ control_plane_endpoint }}" >> /etc/hosts
+  when: domain_check.rc != 0
 
 # Update Package
 - name: Update apt-get repo and cache
@@ -81,6 +97,7 @@
 - name: Get DEB architecture
   shell: dpkg --print-architecture
   register: deb_architecture
+  changed_when: False
 
 - name: Add Docker repository
   apt_repository:

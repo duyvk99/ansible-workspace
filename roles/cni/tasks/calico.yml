@@ -11,7 +11,7 @@
 
 - name: Install Tigera Operator
   shell: |
-    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.1/manifests/tigera-operator.yaml
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml
 
 - name: Install Calico Resources
   shell: |

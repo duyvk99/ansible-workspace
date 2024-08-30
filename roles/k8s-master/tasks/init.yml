@@ -8,7 +8,7 @@
     --pod-network-cidr {{ pod_network_cidr }}
 
 - name: Check if "node-ip" is already present
-  shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env
+  shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env 
   register: node_ip_check
   ignore_errors: true
 

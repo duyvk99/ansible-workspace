@@ -5,19 +5,23 @@
     - master
     - nodes
   roles:
-    - k8s-common
+    - role: k8s-common
+      tags: common
 
 ##### K8s Master #####
 - name: K8S Master
   hosts: 
     - master
   roles:
-    - k8s-master
-    - cni
+    - role: k8s-master
+      tags: master
+    # - role: cni
+    #   tags: cni
 
 ##### K8s Nodes #####
 - name: K8S Nodes
   hosts: 
     - nodes
   roles:
-    - k8s-nodes
+    - role: k8s-nodes
+      tags: nodes

@@ -4,11 +4,11 @@
     kubeadm join --token {{ token }} {{ master_ip }}:6443 --discovery-token-unsafe-skip-ca-verification
 
 - name: Check if "node-ip" is already present
-  shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env
+  shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env 
   register: node_ip_check
   ignore_errors: true
 
 - name: Update Node IP for kubelet
   shell: |
-    sed -i "s/\"$/ --node-ip={{ instance_ip }}\"/g" /var/lib/kubelet/kubeadm-flags.env
+    sed -i "s/\"$/ --node-ip={{ instance_ip }}\"/g" /var/lib/kubelet/kubeadm-flags.env 
   when: node_ip_check.rc != 0
