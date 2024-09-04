@@ -10,7 +10,7 @@
 ##### K8s Master #####
 - name: K8S Master
   hosts: 
-    - master
+    - master-group
   roles:
     - role: k8s-master
       tags: master
@@ -20,7 +20,7 @@
 ##### K8s Nodes #####
 - name: K8S Nodes
   hosts: 
-    - nodes
+    - nodes-group
   roles:
     - role: k8s-nodes
       tags: nodes

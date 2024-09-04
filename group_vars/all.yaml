@@ -6,4 +6,3 @@ ansible_user: ubuntu
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 instance_ip: "{{ ansible_all_ipv4_addresses | sort | first }}"
-master_ip: "{{ hostvars[groups['master'][0]]['ansible_all_ipv4_addresses'] | sort | first }}"

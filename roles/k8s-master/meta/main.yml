@@ -1,4 +1,0 @@
----
-# dependencies:
-  # - { role: commons/os-checker }
-  # - { role: k8s-common/pre-install, pkgs: ["kubelet", "kubeadm", "kubectl"] }
