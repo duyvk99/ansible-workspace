@@ -1,6 +1,6 @@
 ---
 control_plane_endpoint: master-k8s.dannytest.com
-master_ip: "{{ hostvars[groups['master-group'][0]]['ansible_all_ipv4_addresses'] | sort | first }}"
+master_ip: "{{ hostvars[groups['master_group'][0]]['ansible_all_ipv4_addresses'] | sort | first }}"
 
 # Init Kubeadm
 token: abcdef.0123456789abcdef
