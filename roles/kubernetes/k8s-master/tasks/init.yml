@@ -24,13 +24,13 @@
 
 - name: Creates Kubernetes config directory on Root
   file:
-    path: ".kube"
+    path: "/root/.kube"
     state: directory
 
 - name: Copy admin.conf to Home Root directory
   copy:
     src: /etc/kubernetes/admin.conf
-    dest: ".kube/config"
+    dest: "/root/.kube/config"
     owner: "root"
     group: "root"
     mode: 0600

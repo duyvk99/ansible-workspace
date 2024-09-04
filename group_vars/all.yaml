@@ -6,3 +6,5 @@ ansible_user: ubuntu
 ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
 instance_ip: "{{ ansible_all_ipv4_addresses | sort | first }}"
+
+tmp_dir: "/tmp/ansible-tmp-dir"

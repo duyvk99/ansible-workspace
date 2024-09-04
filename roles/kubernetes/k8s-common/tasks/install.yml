@@ -1,4 +1,9 @@
 ---
+# Set Hostname
+- name: Set hostname
+  hostname:
+    name: "{{ inventory_hostname }}"
+
 # Disable Swap 
 - name: Disable SWAP since kubernetes can't work with swap enabled (1/2)
   shell: |

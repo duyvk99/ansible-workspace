@@ -3,16 +3,20 @@
   file:
     path: "{{ network_dir }}/calico"
     state: directory
+  tags: calico
 
 - name: Template Calico Config
-  ansible.builtin.template:
-    src: templates/custom-resources.yaml.j2
-    dest: "{{ network_dir }}/calico/custom-resources.yaml"
+  template:
+    src: templates/calico-custom-resources.yaml.j2
+    dest: "{{ network_dir }}/calico/calico-custom-resources.yaml"
+  tags: calico
 
 - name: Install Tigera Operator
   shell: |
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml
+  tags: calico
 
 - name: Install Calico Resources
   shell: |
-    kubectl create -f {{ network_dir }}/calico/custom-resources.yaml
+    kubectl create -f {{ network_dir }}/calico/calico-custom-resources.yaml
+  tags: calico

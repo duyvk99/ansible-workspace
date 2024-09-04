@@ -1,4 +1,5 @@
 ---
+# Calico
 - name: Check if calico already installed
   stat:
     path: "{{ network_dir }}/calico/custom-resources.yaml"
@@ -10,12 +11,25 @@
   include_tasks: calico.yml
   when: network == "calico" and not calico_conf.stat.exists
 
-- name: Check if cilium already installed
-  stat:
-    path: "{{ network_dir }}/cilium/<file>"
-  register: cilium_conf
+# Cilium
+- name: Check if helm already installed
+  shell: "helm version"
+  register: helm_check
   when: network == "cilium"
+  ignore_errors: true
+
+- name: Run task install helm in role packages
+  include_role:
+    name: packages
+    tasks_from: helm
+  when: network == "cilium" and helm_check.rc != 0
+
+- name: Check if cilium already installed
+  shell: "cilium version --client"
+  register: cilium_check
+  when: network == "cilium"
+  ignore_errors: true
 
 - name: Install Cilium Addons
   include_tasks: cilium.yml
-  when: network == "cilium" and not cilium_conf.stat.exists
+  when: network == "cilium" and cilium_check.rc != 0

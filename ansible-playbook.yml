@@ -4,7 +4,7 @@
   hosts: 
     - cluster
   roles:
-    - role: k8s-common
+    - role: kubernetes/k8s-common
       tags: common
 
 ##### K8s Master #####
@@ -12,7 +12,7 @@
   hosts: 
     - master_group
   roles:
-    - role: k8s-master
+    - role: kubernetes/k8s-master
       tags: master
     - role: cni
       tags: cni
@@ -22,5 +22,5 @@
   hosts: 
     - nodes_group
   roles:
-    - role: k8s-nodes
+    - role: kubernetes/k8s-nodes
       tags: nodes
