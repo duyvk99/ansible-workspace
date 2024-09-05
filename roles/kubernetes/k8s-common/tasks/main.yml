@@ -1,2 +1,6 @@
 ---
-- import_tasks: install.yml
+- name: Configure prerequisites 
+  import_tasks: prerequisites.yml
+
+- name: Install dependencies & packages
+  import_tasks: install.yml

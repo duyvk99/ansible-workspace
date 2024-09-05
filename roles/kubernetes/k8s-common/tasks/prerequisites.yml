@@ -1,0 +1,55 @@
+---
+# Modprobe
+- name: Add module configuration persistent during reboots
+  copy:
+    src: "files/modprobe-k8s.conf"
+    dest: /etc/modules-load.d/k8s.conf
+
+- name: Modprobe - Add overlay module
+  community.general.modprobe:
+    name: overlay
+    state: present
+
+- name: Modprobe - Add br_netfilter module
+  community.general.modprobe:
+    name: br_netfilter
+    state: present
+
+# Enable IPv4 packet forwarding 
+- name: Forwarding bridged traffic
+  sysctl:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    sysctl_set: true
+    sysctl_file: /etc/sysctl.d/k8s.conf
+    reload: true
+  with_items:
+    - { name: 'net.bridge.bridge-nf-call-ip6tables', value: '1' }
+    - { name: 'net.bridge.bridge-nf-call-iptables', value: '1' }
+    - { name: 'net.ipv4.ip_forward', value: '1' }
+
+# Check Systemd
+- name: Get the name of the process with PID 1
+  shell: "ps -p 1 -o comm="
+  register: pid1_process_name
+  changed_when: False
+
+- name: Check if the process is systemd
+  set_fact:
+    is_systemd: "{{ 'true' if pid1_process_name.stdout == 'systemd' else 'false' }}"
+
+- name: Check Systemd
+  debug:
+    msg: "Is the process with PID 1 systemd: {{ is_systemd }}"
+
+# Update /etc/hosts
+- name: Check if control_plane_endpoint is already present or defined
+  shell: grep -q '{{ control_plane_endpoint | default("127.0.0.1") }}' /etc/hosts
+  register: domain_check
+  ignore_errors: true
+
+- name: Update /etc/hosts
+  shell: |
+    echo "{{ master_ip }} {{ control_plane_endpoint }}" >> /etc/hosts
+  when: domain_check.rc != 0 and control_plane_endpoint is defined
+

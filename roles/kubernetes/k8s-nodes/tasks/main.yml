@@ -7,10 +7,3 @@
 - name: Join to cluster if needed
   include_tasks: join.yml
   when: not kubelet_conf.stat.exists
-
-- name: Enable and check kubelet service
-  systemd:
-    name: kubelet
-    daemon_reload: yes
-    state: restarted
-    enabled: yes

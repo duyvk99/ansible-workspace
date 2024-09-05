@@ -1,4 +1,19 @@
 ---
+# Helm: Check & Install
+- name: Check if helm already installed
+  shell: "helm version"
+  register: helm_check
+  ignore_errors: true
+  tags: cilium
+
+- name: Run task install helm in role packages
+  include_role:
+    name: packages
+    tasks_from: helm
+  when: helm_check.rc != 0
+  tags: cilium
+
+# Add Repo & Install Cilium
 - name: Add Cilium stable chart repo
   kubernetes.core.helm_repository:
     name: cilium
@@ -35,7 +50,7 @@
         url: https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz
         dest: "{{ tmp_dir }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz"
         mode: '0700'
-        checksum: sha256:https://github.com/cilium/cilium-cli/releases/download/v0.16.15/cilium-linux-amd64.tar.gz.sha256sum
+        checksum: sha256:https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz.sha256sum
 
     - name: Unarchive a file that is already on the remote machine
       unarchive:
@@ -52,3 +67,4 @@
 
 - name: Check cilium status
   shell: cilium status --wait -n cilium
+  tags: cilium

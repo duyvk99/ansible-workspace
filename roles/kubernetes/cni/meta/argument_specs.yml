@@ -1,0 +1,58 @@
+---
+argument_specs:
+  # roles/cni/tasks/main.yml entry point
+  main:
+    short_description: CNI Common variables.
+    options:
+      network:
+        type: "str"
+        choices:
+          - "calico"
+          - "cilium"
+        required: false
+        default: "calico"
+        description: "Choosing Network Addons."
+
+      pod_network_cidr:
+        type: "str"
+        required: false
+        default: "10.230.0.0/16"
+        description: "Pod Network CIDR"
+
+      network_dir:
+        type: "str"
+        required: false
+        default: "/etc/kubernetes/network"
+        description: "Temporary folder when running"
+
+      tmp_dir:
+        type: "str"
+        required: false
+        default: "/tmp/ansible-tmp-dir"
+        description: "Temporary folder when running"
+
+  # roles/cni/tasks/calico.yml entry point
+  calico:
+    short_description: Calico addons entry point for the CNI role.
+    options:
+      calico_version:
+        type: "str"
+        required: false
+        default: "v3.28.1"
+        description: "Calico version"
+
+  # roles/cni/tasks/cilium.yml entry point
+  cilium:
+    short_description: Calico addons entry point for the CNI role.
+    options:
+      calico_version:
+        type: "str"
+        required: false
+        default: "1.16.1"
+        description: "Cilium version"
+
+      cilium_cli_version:
+        type: "str"
+        required: false
+        default: "v0.16.15"
+        description: "Cilium CLI version"

@@ -1,0 +1,25 @@
+---
+argument_specs:
+  # roles/k8s-common/tasks/main.yml entry point
+  main:
+    short_description: Common variables.
+    options:
+      control_plane_endpoint:
+        type: "str"
+        required: false
+        description: "Control plane endpoint"
+
+      master_ip:
+        type: "str"
+        required: false
+        description: "Kubernetes Master IP"
+
+  # roles/k8s-common/tasks/install.yml entry point
+  install:
+    short_description: Packages version variables.
+    options:
+      kubernetes_version:
+        type: "str"
+        required: false
+        default: "v1.29"
+        description: "Kubernetes version"

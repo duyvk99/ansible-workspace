@@ -1,12 +1,14 @@
 ---
-- name: Init Kube-master
+# Kubeadm init Cluster
+- name: Init kube_master
   shell: |
     kubeadm init --token {{ token }} --token-ttl {{ token_ttl }} \
-    --apiserver-advertise-address {{ master_ip }} \
+    --apiserver-advertise-address {{ master_ip | default(ansible_default_ipv4.address) }} \
     --apiserver-cert-extra-sans {{ additional_sans }} \
-    --control-plane-endpoint {{ control_plane_endpoint }} \
+    --control-plane-endpoint {{ control_plane_endpoint | default(ansible_default_ipv4.address) }} \
     --pod-network-cidr {{ pod_network_cidr }}
 
+# Update kubelet Node IP
 - name: Check if "node-ip" is already present
   shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env 
   register: node_ip_check
@@ -14,14 +16,11 @@
 
 - name: Update Node IP for kubelet
   shell: |
-    sed -i "s/\"$/ --node-ip={{ instance_ip }}\"/g" /var/lib/kubelet/kubeadm-flags.env
+    sed -i "s/\"$/ --node-ip={{ instance_ip | default(ansible_default_ipv4.address) }}\"/g" /var/lib/kubelet/kubeadm-flags.env
   when: node_ip_check.rc != 0
+  notify: Restart kubelet
 
-- name: Creates Kubernetes config directory
-  file:
-    path: ".kube"
-    state: directory
-
+# Create Kube-config
 - name: Creates Kubernetes config directory on Root
   file:
     path: "/root/.kube"

@@ -1,0 +1,47 @@
+---
+argument_specs:
+  # roles/k8s-master/tasks/main.yml entry point
+  main:
+    short_description: Common variables.
+    options:
+      master_ip:
+        type: "str"
+        required: false
+        description: "Kubernetes Master IP"
+
+      instance_ip:
+        type: "str"
+        required: false
+        description: "Instance IP"
+
+  # roles/k8s-master/tasks/init.yml entry point
+  init:
+    short_description: kubeadm init variables.
+    options:
+      control_plane_endpoint:
+        type: "str"
+        required: false
+        description: "Control plane endpoint"
+
+      token:
+        type: "str"
+        required: true
+        description: "Token kubeadm for init and join cluster."
+
+      token_ttl:
+        type: "str"
+        required: false
+        default: "24h0m0s"
+        description: "Token TTL"
+
+      additional_sans:
+        type: "str"
+        required: false
+        default: "localhost"
+        description: "Additional Subject Alternative Names (SANs)"
+
+      pod_network_cidr:
+        type: "str"
+        required: false
+        description: "Pod Network CIDR"
+        default: "10.230.0.0/16"

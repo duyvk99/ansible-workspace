@@ -5,4 +5,3 @@ additional_sans: "10.40.1.90,{{ control_plane_endpoint }}"
 
 # Network Addons
 network: cilium # Choosing in ["calico","cilium"]
-network_dir: /etc/kubernetes/network

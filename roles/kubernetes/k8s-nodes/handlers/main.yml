@@ -1,11 +1,12 @@
 ---
-- name: Start Containerd
-  service: 
-    name: containerd
+- name: Start kubelet
+  service:
+    name: kubelet
+    enabled: true
     state: started
-    enabled: yes
 
-- name: Restart Containerd
-  service: 
-    name: containerd
+- name: Restart kubelet
+  service:
+    name: kubelet
+    enabled: true
     state: restarted

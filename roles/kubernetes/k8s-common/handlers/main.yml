@@ -9,3 +9,14 @@
   service: 
     name: containerd
     state: restarted
+
+- name: Start kubelet
+  service:
+    name: kubelet
+    enabled: true
+    state: started
+
+- name: Restart kubelet
+  service:
+    name: kubelet
+    state: restarted

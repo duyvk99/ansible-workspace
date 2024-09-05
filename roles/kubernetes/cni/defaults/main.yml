@@ -1,0 +1,13 @@
+---
+tmp_dir: "/tmp/ansible-tmp-dir"
+# Network
+network: calico # ["calico","cilium"]
+network_dir: /etc/kubernetes/network
+pod_network_cidr: "10.230.0.0/16"
+
+# Cilium variables
+cilium_version: "1.16.1"
+cilium_cli_version: "v0.16.15"
+
+# Calico varialbes
+calico_version: "v3.28.1"

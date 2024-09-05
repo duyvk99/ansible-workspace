@@ -1,8 +1,10 @@
 ---
+# Join Nodes
 - name: Join Nodes to Kubernetes cluster
   shell: |
-    kubeadm join --token {{ token }} {{ master_ip }}:6443 --discovery-token-unsafe-skip-ca-verification
+    kubeadm join --token {{ token }} {{ master_ip | default(hostvars[groups['kube_master'][0]]['ansible_default_ipv4'].address) }}:6443 --discovery-token-unsafe-skip-ca-verification
 
+# Update kubelet Node IP
 - name: Check if "node-ip" is already present
   shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env 
   register: node_ip_check
@@ -10,5 +12,6 @@
 
 - name: Update Node IP for kubelet
   shell: |
-    sed -i "s/\"$/ --node-ip={{ instance_ip }}\"/g" /var/lib/kubelet/kubeadm-flags.env 
+    sed -i "s/\"$/ --node-ip={{ instance_ip | default(ansible_default_ipv4.address) }}\"/g" /var/lib/kubelet/kubeadm-flags.env 
   when: node_ip_check.rc != 0
+  notify: Restart kubelet
