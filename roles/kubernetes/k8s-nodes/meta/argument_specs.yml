@@ -1,0 +1,24 @@
+---
+argument_specs:
+  # roles/k8s-nodes/tasks/main.yml entry point
+  main:
+    short_description: Common variables.
+    options:
+      master_ip:
+        type: "str"
+        required: false
+        description: "Kubernetes Master IP"
+
+      instance_ip:
+        type: "str"
+        required: false
+        description: "Instance IP"
+
+  # roles/k8s-nodes/tasks/join.yml entry point
+  join:
+    short_description: kubeadm join variables.
+    options:
+      token:
+        type: "str"
+        required: true
+        description: "Token kubeadm for init and join cluster."

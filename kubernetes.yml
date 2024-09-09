@@ -1,0 +1,26 @@
+---
+##### Common #####
+- name: K8S Common
+  hosts: 
+    - kube_cluster
+  roles:
+    - role: kubernetes/k8s-common
+      tags: common
+
+##### K8s Master #####
+- name: K8S Master
+  hosts: 
+    - kube_master
+  roles:
+    - role: kubernetes/k8s-master
+      tags: master
+    - role: kubernetes/cni
+      tags: cni
+
+##### K8s Nodes #####
+- name: K8S Nodes
+  hosts: 
+    - kube_nodes
+  roles:
+    - role: kubernetes/k8s-nodes
+      tags: nodes

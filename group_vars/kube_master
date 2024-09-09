@@ -1,0 +1,7 @@
+---
+# Init Kubeadm
+pod_network_cidr: 10.23.0.0/16
+additional_sans: "10.40.1.90,{{ control_plane_endpoint }}"
+
+# Network Addons
+network: cilium # Choosing in ["calico","cilium"]

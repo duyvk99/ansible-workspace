@@ -1,0 +1,4 @@
+---
+token_ttl: 24h0m0s
+additional_sans: "localhost"
+pod_network_cidr: "10.230.0.0/16"

@@ -1,0 +1,6 @@
+ipam:
+  mode: "cluster-pool"
+  ciliumNodeUpdateRate: "15s"
+  operator:
+    clusterPoolIPv4PodCIDRList: ["{{ pod_network_cidr }}"]
+    clusterPoolIPv4MaskSize: 24

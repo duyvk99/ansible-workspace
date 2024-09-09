@@ -1,0 +1,82 @@
+---
+# Update Package
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+# Install & Update Package
+- name: Install dependencies for containerd & kubernetes
+  apt:
+    pkg:
+    - ca-certificates
+    - curl
+    - apt-transport-https
+    - gpg
+    state: latest
+
+- name: Create directory for Docker's GPG key
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Add Docker's official GPG key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    keyring: /etc/apt/keyrings/docker.gpg
+    state: present
+
+- name: Get DEB architecture
+  shell: dpkg --print-architecture
+  register: deb_architecture
+  changed_when: False
+
+- name: Add Docker repository
+  apt_repository:
+    repo: >-
+      deb [arch={{ deb_architecture.stdout }}
+      signed-by=/etc/apt/keyrings/docker.gpg]
+      https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable
+    filename: docker
+    state: present
+
+- name: Install containerd
+  apt:
+    name: containerd.io
+    state: latest
+
+- name: Systemd template containerd config
+  copy:
+    src: "files/config.toml"
+    dest: /etc/containerd/config.toml
+  when: is_systemd == True
+  notify: Restart Containerd
+
+# Install & Update Package
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Add Kubernetes's official GPG key
+  apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/Release.key
+    keyring: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    state: present
+
+- name: Add Kubernetes repository
+  apt_repository:
+    repo: >-
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg]
+      https://pkgs.k8s.io/core:/stable:/{{ kubernetes_version }}/deb/ /
+    filename: kubernetes
+    state: present
+
+- name: Update apt-get repo and cache
+  apt: update_cache=yes force_apt_get=yes cache_valid_time=3600
+
+- name: Install kube
+  apt:
+    pkg:
+    - kubelet
+    - kubeadm
+    - kubectl
+    state: latest
+  notify: Start kubelet

@@ -1,0 +1,26 @@
+---
+- name: Create tmp folder
+  file:
+    path: "{{ tmp_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  tags: helm
+
+- name: Install Helm
+  block:
+    - name: Get Script files
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        dest: "{{ tmp_dir }}/get_helm.sh"
+        mode: '0700'
+        
+    - name: Install Helm
+      shell: "{{ tmp_dir }}/get_helm.sh"
+  tags: helm
+
+- name: Delete tmp folder
+  file:
+    path: "{{ tmp_dir }}"
+    state: absent
+  tags: helm

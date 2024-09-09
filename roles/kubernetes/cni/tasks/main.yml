@@ -1,0 +1,23 @@
+---
+# Calico
+- name: Check if calico already installed
+  stat:
+    path: "{{ network_dir }}/calico/custom-resources.yaml"
+  register: calico_conf
+  when: 
+    - network == "calico"
+
+- name: Install Calico Addons
+  include_tasks: calico.yml
+  when: network == "calico" and not calico_conf.stat.exists
+
+# Cilium
+- name: Check if cilium already installed
+  shell: "cilium version --client"
+  register: cilium_check
+  when: network == "cilium"
+  ignore_errors: true
+
+- name: Install Cilium Addons
+  include_tasks: cilium.yml
+  when: network == "cilium" and cilium_check.rc != 0

@@ -1,0 +1,52 @@
+---
+# Kubeadm init Cluster
+- name: Init kube_master
+  shell: |
+    kubeadm init --token {{ token }} --token-ttl {{ token_ttl }} \
+    --apiserver-advertise-address {{ master_ip | default(ansible_default_ipv4.address) }} \
+    --apiserver-cert-extra-sans {{ additional_sans }} \
+    --control-plane-endpoint {{ control_plane_endpoint | default(ansible_default_ipv4.address) }} \
+    --pod-network-cidr {{ pod_network_cidr }}
+
+# Update kubelet Node IP
+- name: Check if "node-ip" is already present
+  shell: grep -q 'node-ip' /var/lib/kubelet/kubeadm-flags.env 
+  register: node_ip_check
+  ignore_errors: true
+
+- name: Update Node IP for kubelet
+  shell: |
+    sed -i "s/\"$/ --node-ip={{ instance_ip | default(ansible_default_ipv4.address) }}\"/g" /var/lib/kubelet/kubeadm-flags.env
+  when: node_ip_check.rc != 0
+  notify: Restart kubelet
+
+# Create Kube-config
+- name: Creates Kubernetes config directory on Root
+  file:
+    path: "/root/.kube"
+    state: directory
+
+- name: Copy admin.conf to Home Root directory
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: "/root/.kube/config"
+    owner: "root"
+    group: "root"
+    mode: 0600
+    remote_src: true
+
+- name: Creates Kubernetes config directory
+  file:
+    path: ".kube"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Copy admin.conf to Home directory
+  copy:
+    src: /etc/kubernetes/admin.conf
+    dest: ".kube/config"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: 0600
+    remote_src: true

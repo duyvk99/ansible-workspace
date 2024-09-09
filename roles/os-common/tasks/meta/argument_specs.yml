@@ -1,0 +1,27 @@
+# # roles/myapp/meta/argument_specs.yml
+# ---
+# argument_specs:
+#   # roles/myapp/tasks/main.yml entry point
+#   main:
+#     short_description: The main entry point for the myapp role.
+#     options:
+#       myapp_int:
+#         type: "int"
+#         required: false
+#         default: 42
+#         description: "The integer value, defaulting to 42."
+
+#       myapp_str:
+#         type: "str"
+#         required: true
+#         description: "The string value"
+
+#   # roles/myapp/tasks/alternate.yml entry point
+#   alternate:
+#     short_description: The alternate entry point for the myapp role.
+#     options:
+#       myapp_int:
+#         type: "int"
+#         required: false
+#         default: 1024
+#         description: "The integer value, defaulting to 1024."

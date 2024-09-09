@@ -1,0 +1,70 @@
+---
+# Helm: Check & Install
+- name: Check if helm already installed
+  shell: "helm version"
+  register: helm_check
+  ignore_errors: true
+  tags: cilium
+
+- name: Run task install helm in role packages
+  include_role:
+    name: packages
+    tasks_from: helm
+  when: helm_check.rc != 0
+  tags: cilium
+
+# Add Repo & Install Cilium
+- name: Add Cilium stable chart repo
+  kubernetes.core.helm_repository:
+    name: cilium
+    repo_url: "https://helm.cilium.io/"
+  tags: cilium
+
+- name: Deploy Cilium {{ cilium_version }}
+  kubernetes.core.helm:
+    name: cilium
+    chart_ref: cilium/cilium
+    release_namespace: cilium
+    create_namespace: true
+    chart_version: "{{ cilium_version }}"
+    values: "{{ lookup('template', 'cilium-helm-value.yaml') | from_yaml }}"
+  tags: cilium
+
+- name: Create tmp folder
+  file:
+    path: "{{ tmp_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  tags: cilium
+
+- name: Install Cilium Resources
+  block:
+    - name: Get architecture
+      shell: dpkg --print-architecture
+      register: deb_architecture
+      changed_when: False
+
+    - name: Get Cilium Source
+      get_url:
+        url: https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz
+        dest: "{{ tmp_dir }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz"
+        mode: '0700'
+        checksum: sha256:https://github.com/cilium/cilium-cli/releases/download/{{ cilium_cli_version }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz.sha256sum
+
+    - name: Unarchive a file that is already on the remote machine
+      unarchive:
+        src: "{{ tmp_dir }}/cilium-linux-{{ deb_architecture.stdout }}.tar.gz"
+        dest: /usr/local/bin
+        remote_src: yes 
+  tags: cilium
+
+- name: Delete tmp folder
+  file:
+    path: "{{ tmp_dir }}"
+    state: absent
+  tags: cilium
+
+- name: Check cilium status
+  shell: cilium status --wait -n cilium
+  tags: cilium
