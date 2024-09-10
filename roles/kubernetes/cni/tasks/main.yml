@@ -2,7 +2,7 @@
 # Calico
 - name: Check if calico already installed
   stat:
-    path: "{{ network_dir }}/calico/custom-resources.yaml"
+    path: "{{ network_dir }}/calico/calico-custom-resources.yaml"
   register: calico_conf
   when: 
     - network == "calico"

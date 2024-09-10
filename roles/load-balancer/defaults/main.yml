@@ -1,0 +1,5 @@
+---
+additional_domain_name: ""
+domain_name: "dannyproject.local"
+servers: "{{ groups['kube_cluster'] | map('extract', hostvars, ['instance_ip']) | map('regex_replace', '^(.+)$', '\\1:30692') | list }}"
+conf_dir: "/etc/nginx"

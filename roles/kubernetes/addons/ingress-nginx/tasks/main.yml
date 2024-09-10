@@ -1,0 +1,18 @@
+---
+# Helm: Check & Install
+- name: Check if helm already installed
+  shell: "helm version"
+  register: helm_check
+  ignore_errors: true
+  tags: ingress-nginx
+
+- name: Run task install helm in role packages
+  include_role:
+    name: packages
+    tasks_from: helm
+  when: helm_check.rc != 0
+  tags: ingress-nginx
+
+- name: Install Ingress Nginx Addons
+  include_tasks: install.yml
+

@@ -1,0 +1,17 @@
+---
+# Add Repo & Install Cilium
+- name: Add Ingress Nginx stable chart repo
+  kubernetes.core.helm_repository:
+    name: ingress-nginx
+    repo_url: "https://kubernetes.github.io/ingress-nginx"
+  tags: ingress-nginx
+
+- name: Deploy Ingress Nginx {{ ingress_nginx_version }}
+  kubernetes.core.helm:
+    name: ingress-nginx
+    chart_ref: ingress-nginx/ingress-nginx
+    release_namespace: ingress-nginx
+    create_namespace: true
+    chart_version: "{{ ingress_nginx_version }}"
+    values: "{{ lookup('template', 'onprem.yaml') | from_yaml }}"
+  tags: ingress-nginx

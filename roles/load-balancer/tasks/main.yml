@@ -1,0 +1,26 @@
+---
+# Nginx: Check & Install
+- name: Check if nginx already installed
+  shell: "nginx -v"
+  register: nginx_check
+  ignore_errors: true
+  tags: nginx
+
+- name: Run task install nginx in role packages
+  include_role:
+    name: packages
+    tasks_from: nginx
+  when: nginx_check.rc != 0
+  tags: nginx
+
+# Config
+- name: Template nginx conf 
+  template:
+    src: templates/http-template.conf.j2
+    dest: "{{ conf_dir }}/conf.d/{{ domain_name }}.conf"
+    owner: root
+    group: root
+    mode: '0644'
+  tags: nginx
+  notify: Reload nginx
+

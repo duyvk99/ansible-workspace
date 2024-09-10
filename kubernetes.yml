@@ -1,26 +1,43 @@
 ---
-##### Common #####
-- name: K8S Common
-  hosts: 
-    - kube_cluster
-  roles:
-    - role: kubernetes/k8s-common
-      tags: common
+- name: Gather IP addresses for kube_cluster
+  hosts: kube_cluster
+  gather_facts: yes
+  tasks:
+    - name: Set instance_ip fact for each host
+      set_fact:
+        instance_ip: "{{ ansible_all_ipv4_addresses | sort | first }}"
+
+# ##### Common #####
+# - name: K8S Common
+#   hosts: 
+#     - kube_cluster
+#   roles:
+#     - role: kubernetes/k8s-common
+#       tags: common
 
 ##### K8s Master #####
-- name: K8S Master
-  hosts: 
-    - kube_master
-  roles:
-    - role: kubernetes/k8s-master
-      tags: master
-    - role: kubernetes/cni
-      tags: cni
+# - name: K8S Master
+#   hosts: 
+#     - kube_master
+#   roles:
+#     - role: kubernetes/k8s-master
+#       tags: master
+#     - role: kubernetes/cni
+#       tags: cni
+#     - role: kubernetes/addons/ingress-nginx
+#       tags: ingress-nginx
 
-##### K8s Nodes #####
-- name: K8S Nodes
-  hosts: 
-    - kube_nodes
+# ##### K8s Nodes #####
+# - name: K8S Nodes
+#   hosts: 
+#     - kube_nodes
+#   roles:
+#     - role: kubernetes/k8s-nodes
+#       tags: nodes
+
+- name: Load Balancer
+  hosts:
+    - load_balancer
   roles:
-    - role: kubernetes/k8s-nodes
-      tags: nodes
+    - role: load-balancer
+      tags: load-balancer

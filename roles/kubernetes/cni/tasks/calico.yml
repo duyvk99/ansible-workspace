@@ -1,5 +1,5 @@
 ---
-- name: Creates Netowrk Addons directory
+- name: Creates Network Addons directory
   file:
     path: "{{ network_dir }}/calico"
     state: directory

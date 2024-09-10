@@ -1,0 +1,108 @@
+controller:
+  config:
+    allow-snippet-annotations: "true"
+    enable-modsecurity: "false"
+    enable-owasp-modsecurity-crs: "true"
+    log-format-upstream: $proxy_add_x_forwarded_for - $remote_user [$time_local] "$request"
+      $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_length
+      $request_time [$proxy_upstream_name] [$proxy_alternative_upstream_name] $upstream_addr
+      $upstream_response_length $upstream_response_time $upstream_status $req_id
+    upstream-keepalive-timeout: '20'
+    use-forwarded-headers: 'true'
+
+    # enable-opentracing: "true"
+    # jaeger-collector-host: "jaeger-agent.ingress-nginx-new.svc.cluster.local"
+    # jaeger-service-name: "ingress-nginx"
+    # jaeger-propagation-format: "w3c"
+
+    enable-opentelemetry: "true"
+    # #opentelemetry-config: "/etc/ingress-controller/telemetry/opentelemetry.toml"
+    opentelemetry-operation-name: "HTTP $request_method $service_name $uri"
+    opentelemetry-trust-incoming-span: "true"
+    #otlp-collector-host: "10.100.22.141"
+    #otlp-collector-port: "8200"
+    otel-max-queuesize: "2048"
+    otel-schedule-delay-millis: "5000"
+    otel-max-export-batch-size: "512"
+    otel-service-name: "nginx-proxy" # Opentelemetry resource name
+    otel-sampler: "AlwaysOn" # Also: AlwaysOff, TraceIdRatioBased
+    otel-sampler-ratio: "1.0"
+    otel-sampler-parent-based: "false"
+    large-client-header-buffers:  "4 16k"
+    
+  extraEnvs:
+  - name: HOST_IP
+    valueFrom:
+      fieldRef:
+        apiVersion: v1
+        fieldPath: status.hostIP
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: http://$(HOST_IP):8200
+
+  extraVolumeMounts:
+  - mountPath: /etc/nginx/owasp-modsecurity-crs/nginx-modsecurity.conf
+    name: owasp-rules-vol
+    subPath: nginx-modsecurity.conf
+  - mountPath: /etc/nginx/modsecurity/modsecurity.conf
+    name: modsecurity-conf-vol
+    subPath: modsecurity.conf
+  - mountPath: /etc/nginx/owasp-modsecurity-crs/crs-setup.conf
+    name: custom-rules-vol
+    subPath: crs-setup.conf
+  - mountPath: /etc/nginx/owasp-modsecurity-crs/rules/REQUEST-942-APPLICATION-ATTACK-SQLI.conf
+    name: custom-rules-vol
+    subPath: REQUEST-942-APPLICATION-ATTACK-SQLI.conf
+  - mountPath: /etc/nginx/owasp-modsecurity-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+    name: custom-rules-vol
+    subPath: REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+  - mountPath: /etc/nginx/owasp-modsecurity-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+    name: custom-rules-vol
+    subPath: RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+  - mountPath: /data/logs/ingress
+    name: modsecurity-audit-log-vol
+  extraVolumes:
+  - configMap:
+      defaultMode: 420
+      name: owasp-rules-config
+    name: owasp-rules-vol
+  - configMap:
+      defaultMode: 420
+      name: custom-rules-config
+    name: custom-rules-vol
+  - emptyDir: {}
+    name: modsecurity-audit-log-vol
+  - configMap:
+      name: modsecurity-config
+    name: modsecurity-conf-vol
+  image:
+    tag: v1.7.0
+  ingressClass: nginx
+  ingressClassResource:
+    controllerValue: k8s.io/ingress-nginx
+    name: nginx
+  opentelemetry:
+    allowPrivilegeEscalation: false
+    containerSecurityContext: null
+    enabled: true
+    image: registry.k8s.io/ingress-nginx/opentelemetry:v20230312-helm-chart-4.5.2-28-g66a760794@sha256:40f766ac4a9832f36f217bb0e98d44c8d38faeccbfe861fbc1a76af7e9ab257f
+  service:
+    external:
+      enabled: false
+    internal:
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-attributes: load_balancing.cross_zone.enabled=true
+        service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+        service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-southeast-1:968914998835:certificate/f41dce9b-8a4d-45a3-9d4e-95cd609b4cb0, arn:aws:acm:ap-southeast-1:968914998835:certificate/70ee31c9-6d36-48c3-92a7-f25b82a211b6, arn:aws:acm:ap-southeast-1:968914998835:certificate/0275a128-619e-4c86-a9da-d3d7db6258f6, arn:aws:acm:ap-southeast-1:968914998835:certificate/c5f1a656-5349-4d05-afa6-331af4b8f9ed, arn:aws:acm:ap-southeast-1:968914998835:certificate/778e09fc-f8e9-46d1-9a05-7426275acfed, arn:aws:acm:ap-southeast-1:968914998835:certificate/d3f9517b-8da5-43ba-93f3-e1c97c6a23ec
+        service.beta.kubernetes.io/aws-load-balancer-subnets: isplab-common-private-ap-southeast-1a-0,isplab-common-private-ap-southeast-1b-0,isplab-common-private-ap-southeast-1c-0
+        service.beta.kubernetes.io/aws-load-balancer-type: external
+        service.beta.kubernetes.io/aws-load-balancer-ssl-ports: '443'
+      enabled: true
+      externalTrafficPolicy: "Local"
+    targetPorts:
+      http: http
+      https: http
+tcp:
+  "9095": "vgp-middleware/kafka-controller-0-external:9095"
+  "6379": "vgp-middleware/redis-master:6379"
+  "5349": "av/av-identity-vault-service:5349"
+  "2021": "av/av-iam-service:2021"
